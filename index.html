@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Time Is Worth</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --gold: #c9a84c;
+      --gold-dim: #8a6f30;
+      --text: #e8e2d4;
+      --muted: #6b6560;
+      --danger: #c94c4c;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    /* subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* - HEADER - */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 10vw, 4rem);
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .header p {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* - SCREENS - */
+    .screen {
+      display: none;
+      animation: fadeUp 0.3s ease forwards;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* - CARD - */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 32px;
+    }
+
+    .card-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .result-text {
+      font-size: 1rem;
+      line-height: 2;
+      color: var(--text);
+    }
+
+    .result-text .highlight {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .result-text .big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+      line-height: 1.1;
+      display: block;
+      margin: 8px 0;
+    }
+
+    /* - INPUTS - */
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-group input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 1.4rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--gold);
+    }
+
+    .input-group input::placeholder { color: var(--muted); }
+
+    .input-prefix {
+      position: relative;
+    }
+    .input-prefix span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold-dim);
+      font-size: 1.4rem;
+      pointer-events: none;
+    }
+    .input-prefix input { padding-left: 30px; }
+
+    /* - SAVE TOGGLE - */
+    .save-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 3px; top: 3px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--gold-dim); }
+    .toggle input:checked + .toggle-track::after {
+      transform: translateX(16px);
+      background: var(--gold);
+    }
+
+    /* - BUTTONS - */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 13px 20px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    .btn-primary {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(201,168,76,0.06);
+    }
+
+    .btn-primary:hover {
+      background: rgba(201,168,76,0.15);
+    }
+
+    .btn-reset {
+      border-color: transparent;
+      color: var(--muted);
+    }
+    .btn-reset:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* - MORE TABLE - */
+    .more-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .more-table tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .more-table td {
+      padding: 10px 4px;
+      font-size: 0.85rem;
+    }
+
+    .more-table td:first-child {
+      color: var(--gold);
+      font-weight: 500;
+      width: 70px;
+    }
+
+    .more-table td:last-child {
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* - DIVIDER - */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    /* - ERROR - */
+    .error-msg {
+      font-size: 0.65rem;
+      color: var(--danger);
+      letter-spacing: 0.1em;
+      margin-top: 8px;
+      min-height: 1em;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Your Time<br>Is Worth</h1>
+    <p>Time &mdash; Converted to Dollars</p>
+  </div>
+
+  <!-- - SCREEN 1: Enter hourly wage - -->
+  <div class="screen active" id="screen1">
+    <div class="card">
+      <div class="card-label">Step 1 of 2 &mdash; Your Rate</div>
+      <div class="input-group">
+        <label>Hourly wage</label>
+        <div class="input-prefix">
+          <span>$</span>
+          <input type="number" id="salaryInput" placeholder="0.00" min="0" step="0.01" inputmode="decimal" />
+        </div>
+        <div class="error-msg" id="salaryError"></div>
+      </div>
+      <div class="save-row">
+        <label class="toggle">
+          <input type="checkbox" id="saveToggle" />
+          <span class="toggle-track"></span>
+        </label>
+        Remember my wage
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goToScreen2()">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- - SCREEN 2: Enter spend amount - -->
+  <div class="screen" id="screen2">
+    <div class="card">
+      <div class="card-label">Step 2 of 2 &mdash; Purchase</div>
+      <div class="result-text" id="screen2Header"></div>
+      <hr class="divider" />
+      <div class="input-group">
+        <label>Amount to spend</label>
+        <div class="input-prefix">
+          <span>$</span>
+          <input type="number" id="spendInput" placeholder="0.00" min="0" step="0.01" inputmode="decimal" />
+        </div>
+        <div class="error-msg" id="spendError"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-reset" onclick="reset()">&#8592; Reset</button>
+        <button class="btn btn-primary" onclick="calculate()">Calculate &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- - SCREEN 3: Result (simple) - -->
+  <div class="screen" id="screen3">
+    <div class="card">
+      <div class="card-label">Result</div>
+      <div class="result-text" id="resultSimple"></div>
+      <div class="btn-row">
+        <button class="btn btn-reset" onclick="reset()">&#8592; Reset</button>
+        <button class="btn" onclick="goToMore()">More &darr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- - SCREEN 4: Result (more) - -->
+  <div class="screen" id="screen4">
+    <div class="card">
+      <div class="card-label">Breakdown</div>
+      <div class="result-text" id="resultMore"></div>
+      <table class="more-table" id="moreTable"></table>
+      <div class="btn-row">
+        <button class="btn btn-reset" onclick="reset()">&#8592; Reset</button>
+        <button class="btn" onclick="goToSimple()">&#8593; Less</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // - State -
+  let salary = 0;
+  let spend = 0;
+
+  // - Persistence -
+  const SALARY_KEY = 'ytiw_salary';
+  const SAVE_KEY   = 'ytiw_save';
+
+  function loadPrefs() {
+    const saveOn = localStorage.getItem(SAVE_KEY) === 'true';
+    const saveToggle = document.getElementById('saveToggle');
+    saveToggle.checked = saveOn;
+    if (saveOn) {
+      const saved = localStorage.getItem(SALARY_KEY);
+      if (saved) {
+        document.getElementById('salaryInput').value = saved;
+      }
+    }
+  }
+
+  document.getElementById('saveToggle').addEventListener('change', function () {
+    localStorage.setItem(SAVE_KEY, this.checked);
+    if (!this.checked) localStorage.removeItem(SALARY_KEY);
+  });
+
+  // - Formatting helpers -
+  function fmt(n) {
+    return n.toFixed(2);
+  }
+
+  function timeString(hours) {
+    const h = Math.floor(hours);
+    const m = fmt((hours - h) * 60);
+    return `${h} hr${h !== 1 ? 's' : ''}, ${m} min`;
+  }
+
+  // - Navigation -
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function goToScreen2() {
+    const val = parseFloat(document.getElementById('salaryInput').value);
+    const err = document.getElementById('salaryError');
+    if (!val || val <= 0) {
+      err.textContent = 'Please enter a valid hourly wage.';
+      return;
+    }
+    err.textContent = '';
+    salary = val;
+
+    if (document.getElementById('saveToggle').checked) {
+      localStorage.setItem(SALARY_KEY, val);
+    }
+
+    document.getElementById('screen2Header').innerHTML =
+      `You make <span class="highlight">$${fmt(salary)}</span> per hour.<br>How much do you want to spend?`;
+
+    document.getElementById('spendInput').value = '';
+    document.getElementById('spendError').textContent = '';
+    showScreen('screen2');
+    setTimeout(() => document.getElementById('spendInput').focus(), 50);
+  }
+
+  function calculate() {
+    const val = parseFloat(document.getElementById('spendInput').value);
+    const err = document.getElementById('spendError');
+    if (!val || val <= 0) {
+      err.textContent = 'Please enter an amount to spend.';
+      return;
+    }
+    err.textContent = '';
+    spend = val;
+    renderSimple();
+    showScreen('screen3');
+  }
+
+  function renderSimple() {
+    const hours = spend / salary;
+    document.getElementById('resultSimple').innerHTML =
+      `You make <span class="highlight">$${fmt(salary)}/hr</span>.<br><br>` +
+      `That's <span class="highlight">$${fmt(spend)}</span> in` +
+      `<span class="big">${timeString(hours)}</span>`;
+  }
+
+  function goToMore() {
+    const hours = spend / salary;
+    const amounts = [1, 5, 10, 50, 100, 500, 1000];
+
+    document.getElementById('resultMore').innerHTML =
+      `You make <span class="highlight">$${fmt(salary)}/hr</span>.&nbsp; ` +
+      `That's <span class="highlight">$${fmt(spend)}</span> in ` +
+      `<strong>${timeString(hours)}</strong>.`;
+
+    const rows = amounts.map(a => {
+      const t = a / salary;
+      return `<tr>
+        <td>$${a}</td>
+        <td>${timeString(t)}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('moreTable').innerHTML = rows;
+    showScreen('screen4');
+  }
+
+  function goToSimple() {
+    renderSimple();
+    showScreen('screen3');
+  }
+
+  function reset() {
+    document.getElementById('spendInput').value = '';
+    document.getElementById('spendError').textContent = '';
+    showScreen('screen1');
+    // Re-apply saved salary if toggled on
+    loadPrefs();
+    setTimeout(() => document.getElementById('salaryInput').focus(), 50);
+  }
+
+  // - Allow Enter key to advance -
+  document.getElementById('salaryInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') goToScreen2();
+  });
+  document.getElementById('spendInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') calculate();
+  });
+
+  // - Init -
+  loadPrefs();
+</script>
+</body>
+</html>
