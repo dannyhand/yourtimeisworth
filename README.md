@@ -5,4 +5,4 @@ Originally conceived and published in Java as an Android app years ago, I used C
 
 You input your pay rate and how much you wish to spend, and the app replies how much time your purchase will cost.
 
-See it work at https://dannyhand.us/time/
+Try it out at https://dannyhand.us/time/
