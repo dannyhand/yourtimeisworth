@@ -5,7 +5,7 @@ You input your pay rate and how much you wish to spend, and the app replies how 
 
 Try it out at https://dannyhand.us/time/
 
-## Build for Android
+### Build for Android
 Do: `GitHub > Actions > Build Android APK`
 
  - Uses Capacitor to produce apk.
